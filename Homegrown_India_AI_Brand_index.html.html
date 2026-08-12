@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homegrown India — AI Brand Finder</title>
+<style>
+:root{--ink:#1f1b18;--muted:#716861;--paper:#fbf8f4;--card:#fff;--line:#e9e0d7;--accent:#9a5a3a;--accent2:#ead7ca}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#fbf8f4,#f4ebe4);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.container{max-width:1080px;margin:auto;padding:34px 20px 60px}.hero{padding:28px 0 20px}.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700}.hero h1{font-family:Georgia,serif;font-size:clamp(38px,7vw,70px);line-height:.98;margin:12px 0}.hero p{max-width:700px;color:var(--muted);font-size:17px;line-height:1.6}
+.searchbox{background:rgba(255,255,255,.8);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 14px 40px rgba(63,43,30,.08)} textarea{width:100%;resize:vertical;min-height:105px;border:0;outline:0;background:transparent;font-size:18px;font-family:inherit;color:var(--ink)} .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer}.chip.active{background:var(--ink);color:#fff}.btn{border:0;border-radius:999px;background:var(--accent);color:#fff;padding:12px 20px;font-weight:700;cursor:pointer;margin-left:auto}.examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.example{font-size:13px;background:#f5ede7;border:0;border-radius:999px;padding:8px 12px;cursor:pointer;color:#60493b}
+.results-head{display:flex;justify-content:space-between;align-items:end;margin:36px 0 14px}.results-head h2{font-family:Georgia,serif;margin:0;font-size:30px}.count{color:var(--muted);font-size:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 25px rgba(63,43,30,.05)}.rank{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.1em}.card h3{margin:7px 0 5px;font-family:Georgia,serif;font-size:25px}.meta{color:var(--muted);font-size:13px;margin-bottom:12px}.score{display:inline-block;background:#f2e4da;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:13px 0}.tag{font-size:12px;background:#f7f3ef;border-radius:999px;padding:6px 9px}.why{font-size:14px;line-height:1.55;color:#514842;border-top:1px solid var(--line);padding-top:12px}.link{display:inline-block;margin-top:14px;color:var(--accent);font-weight:700;text-decoration:none}.empty{padding:28px;border:1px dashed #d9c9bd;border-radius:18px;color:var(--muted);text-align:center}.footer{margin-top:42px;color:var(--muted);font-size:12px;text-align:center}.select{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="container">
+<section class="hero">
+<div class="eyebrow">Homegrown India · AI Brand Discovery</div>
+<h1>Find the brand<br>that fits your vibe.</h1>
+<p>Describe what you are looking for in natural language. The recommendation engine matches your request against a curated database of Indian homegrown brands using category, products, price positioning and AI-generated discovery tags.</p>
+</section>
+
+<section class="searchbox">
+<textarea id="query" placeholder="Try: affordable, trendy jewellery for everyday wear…"></textarea>
+<div class="controls">
+<button class="chip active" data-cat="All">All</button>
+<button class="chip" data-cat="Clothing">Clothing</button>
+<button class="chip" data-cat="Jewellery">Jewellery</button>
+<button class="chip" data-cat="Gifting">Gifting</button>
+<button class="chip" data-cat="Beauty">Beauty</button>
+<select id="limit" class="select"><option value="6">Top 6</option><option value="10">Top 10</option><option value="15">Top 15</option></select>
+<button class="btn" id="searchBtn">Find brands →</button>
+</div>
+<div class="examples">
+<button class="example">Affordable Gen-Z jewellery for everyday wear</button>
+<button class="example">Cute Pinteresty outfits under a budget</button>
+<button class="example">Personalised wedding gifting</button>
+<button class="example">Affordable skincare for Gen Z</button>
+</div>
+</section>
+
+<div class="results-head"><h2>Recommended for you</h2><div class="count" id="count"></div></div>
+<div id="results" class="grid"></div>
+<div class="footer">Portfolio prototype · Curated dataset + AI-assisted tagging + explainable relevance ranking</div>
+</div>
+
+<script>
+const brands = [{"Brand Name": "The SecondSkin", "Category": "Clothing", "Subcategory": "kurtis and kurti sets", "City / Location": "", "Instagram Link": "https://www.instagram.com/thesecondskin.co.in?igsh=anU4OXV6dDRvdWhz", "Price Range": "500-2k", "Main Products": "short kurtis , trending farsi salwar set , noodle strap kurtis", "Instagram Followers": "60k", "AI Tags": "Gen Z, Indo-western, trend-led, affordable, everyday ethnic", "Search Profile": "The SecondSkin. Category: Clothing. Subcategory: kurtis and kurti sets. Products: short kurtis , trending farsi salwar set , noodle strap kurtis. Price range: 500-2k. Audience/style/positioning tags: Gen Z, Indo-western, trend-led, affordable, everyday ethnic."}, {"Brand Name": "Odelia", "Category": "Clothing", "Subcategory": "Indo western wear ", "City / Location": "", "Instagram Link": "https://www.instagram.com/theodeliaa?igsh=MXA0Y3p0ejRiMWE5cw==", "Price Range": "10k-30k", "Main Products": "Luxury womens wear , custom edits", "Instagram Followers": "5k", "AI Tags": "Luxury, Indo-western, womenswear, occasionwear, custom", "Search Profile": "Odelia. Category: Clothing. Subcategory: Indo western wear. Products: Luxury womens wear , custom edits. Price range: 10k-30k. Audience/style/positioning tags: Luxury, Indo-western, womenswear, occasionwear, custom."}, {"Brand Name": "amorn", "Category": "Clothing", "Subcategory": "", "City / Location": "", "Instagram Link": "", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Homegrown, womenswear, contemporary, fashion-forward", "Search Profile": "amorn. Category: Clothing. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Homegrown, womenswear, contemporary, fashion-forward."}, {"Brand Name": "Lowkey Originals", "Category": "Clothing", "Subcategory": "Ethnic Tops", "City / Location": "", "Instagram Link": "https://www.instagram.com/low.key.originals?igsh=MXdqbmc5NDU4Mm9taA==", "Price Range": "1k-2k", "Main Products": "Backless ethnic tops , corset tops", "Instagram Followers": "7k", "AI Tags": "Gen Z, ethnic-fusion, trendy, statement tops, affordable", "Search Profile": "Lowkey Originals. Category: Clothing. Subcategory: Ethnic Tops. Products: Backless ethnic tops , corset tops. Price range: 1k-2k. Audience/style/positioning tags: Gen Z, ethnic-fusion, trendy, statement tops, affordable."}, {"Brand Name": "Kumkum Shawls", "Category": "Clothing", "Subcategory": "Kaftan ", "City / Location": "", "Instagram Link": "https://www.instagram.com/kumkum.shawls?igsh=MXJsNmZxaTJ0ZmozMA==", "Price Range": "1k-3k", "Main Products": "Short trending kaftan tops", "Instagram Followers": "15k", "AI Tags": "Ethnic, resortwear, trendy, feminine, affordable", "Search Profile": "Kumkum Shawls. Category: Clothing. Subcategory: Kaftan. Products: Short trending kaftan tops. Price range: 1k-3k. Audience/style/positioning tags: Ethnic, resortwear, trendy, feminine, affordable."}, {"Brand Name": "Love Viana", "Category": "Clothing", "Subcategory": "Pinteresty tops", "City / Location": "", "Instagram Link": "https://www.instagram.com/loveviana.in?igsh=Z29kdGlxMGx5YTky", "Price Range": "2k-4k", "Main Products": "Tosp , Dresses , skirts , accessories ", "Instagram Followers": "30k", "AI Tags": "Pinterest-core, Gen Z, feminine, trendy, affordable", "Search Profile": "Love Viana. Category: Clothing. Subcategory: Pinteresty tops. Products: Tosp , Dresses , skirts , accessories. Price range: 2k-4k. Audience/style/positioning tags: Pinterest-core, Gen Z, feminine, trendy, affordable."}, {"Brand Name": "Evierose Clothing", "Category": "Clothing", "Subcategory": "Homegrown sustainable clothing", "City / Location": "", "Instagram Link": "https://www.instagram.com/evierose.in?igsh=MW80aTN3OXI3eDd6aw==", "Price Range": "1.5k-3k", "Main Products": "Tops, Dresses", "Instagram Followers": "145k", "AI Tags": "Sustainable, homegrown, contemporary, womenswear, conscious", "Search Profile": "Evierose Clothing. Category: Clothing. Subcategory: Homegrown sustainable clothing. Products: Tops, Dresses. Price range: 1.5k-3k. Audience/style/positioning tags: Sustainable, homegrown, contemporary, womenswear, conscious."}, {"Brand Name": "Weary Your Words", "Category": "Clothing", "Subcategory": "Hand Embellished articles", "City / Location": "", "Instagram Link": "https://www.instagram.com/wearyourwordsdotin?igsh=MWozb2Q0OWQxMXE1", "Price Range": "2k-3k", "Main Products": "Embellished Jeans", "Instagram Followers": "104k", "AI Tags": "Handcrafted, embellished, statement, occasionwear, youth-focused", "Search Profile": "Weary Your Words. Category: Clothing. Subcategory: Hand Embellished articles. Products: Embellished Jeans. Price range: 2k-3k. Audience/style/positioning tags: Handcrafted, embellished, statement, occasionwear, youth-focused."}, {"Brand Name": "Oyela", "Category": "Clothing", "Subcategory": "it girls fits", "City / Location": "", "Instagram Link": "https://www.instagram.com/oyela.in?igsh=MWJ6YjAwOWF6eWx1OA==", "Price Range": "500-2k", "Main Products": "Shirts , tops", "Instagram Followers": "307k", "AI Tags": "Gen Z, trend-led, social-first, affordable, contemporary", "Search Profile": "Oyela. Category: Clothing. Subcategory: it girls fits. Products: Shirts , tops. Price range: 500-2k. Audience/style/positioning tags: Gen Z, trend-led, social-first, affordable, contemporary."}, {"Brand Name": "Blue Brew", "Category": "Clothing", "Subcategory": "", "City / Location": "", "Instagram Link": "https://www.instagram.com/bluebrew.in?igsh=OHpkZnc3NjRsemMw", "Price Range": "1k-3k", "Main Products": "Cute trending embroidered tank tops", "Instagram Followers": "58k", "AI Tags": "Gen Z, cute, embroidered, casualwear, trend-led", "Search Profile": "Blue Brew. Category: Clothing. Subcategory: . Products: Cute trending embroidered tank tops. Price range: 1k-3k. Audience/style/positioning tags: Gen Z, cute, embroidered, casualwear, trend-led."}, {"Brand Name": "Klassy", "Category": "Jewellery", "Subcategory": "Accessories and gifting hampers", "City / Location": "", "Instagram Link": "https://www.instagram.com/klassy.in?igsh=cTVteHVoZHp2M200", "Price Range": "1k-4k", "Main Products": "Earings , lockets , personalised hamper", "Instagram Followers": "54k", "AI Tags": "Personalised, gifting, affordable, jewellery, occasion-based", "Search Profile": "Klassy. Category: Jewellery. Subcategory: Accessories and gifting hampers. Products: Earings , lockets , personalised hamper. Price range: 1k-4k. Audience/style/positioning tags: Personalised, gifting, affordable, jewellery, occasion-based."}, {"Brand Name": "SavyaSpark Jewels", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/sparkbysavya?igsh=MW9pdzlvbnljMXlmcA==", "Price Range": "300-1k", "Main Products": "Trending lockets ", "Instagram Followers": "2k", "AI Tags": "Affordable, trendy, minimal, everyday jewellery, youth-focused", "Search Profile": "SavyaSpark Jewels. Category: Jewellery. Subcategory: Accessories. Products: Trending lockets. Price range: 300-1k. Audience/style/positioning tags: Affordable, trendy, minimal, everyday jewellery, youth-focused."}, {"Brand Name": "Pearl Petals", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/pearlpetals.in?igsh=MW5rY2dzMTlrMTh3ZA==", "Price Range": "500-2k", "Main Products": "Bracelets, earings , rings", "Instagram Followers": "2k", "AI Tags": "Feminine, affordable, everyday jewellery, trendy, gifting", "Search Profile": "Pearl Petals. Category: Jewellery. Subcategory: Accessories. Products: Bracelets, earings , rings. Price range: 500-2k. Audience/style/positioning tags: Feminine, affordable, everyday jewellery, trendy, gifting."}, {"Brand Name": "Nannya Jewellery", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/nannyajewellery?igsh=NGJvOXIxNmkzajhi", "Price Range": "400-1k", "Main Products": "Earings", "Instagram Followers": "1k", "AI Tags": "", "Search Profile": "Nannya Jewellery. Category: Jewellery. Subcategory: Accessories. Products: Earings. Price range: 400-1k. Audience/style/positioning tags: ."}, {"Brand Name": "Iraa Jewellery", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/iraajewellery?igsh=MTh4ZTEwYnA4MHk3ag==", "Price Range": "500-1k", "Main Products": "Dainty Necklaces , ear cuffs , bracelets and more", "Instagram Followers": "1.3k", "AI Tags": "Dainty, minimal, everyday, affordable, contemporary", "Search Profile": "Iraa Jewellery. Category: Jewellery. Subcategory: Accessories. Products: Dainty Necklaces , ear cuffs , bracelets and more. Price range: 500-1k. Audience/style/positioning tags: Dainty, minimal, everyday, affordable, contemporary."}, {"Brand Name": "Lili Origin", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/lili_origin?igsh=bXQ3dXlnZTQxZ2xy", "Price Range": "200-1.5k", "Main Products": "Chains , trending earings , anti tarnish jewels", "Instagram Followers": "480k", "AI Tags": "Trendy, anti-tarnish, affordable, everyday, high-volume", "Search Profile": "Lili Origin. Category: Jewellery. Subcategory: Accessories. Products: Chains , trending earings , anti tarnish jewels. Price range: 200-1.5k. Audience/style/positioning tags: Trendy, anti-tarnish, affordable, everyday, high-volume."}, {"Brand Name": "Moonzy Jewellery Studio", "Category": "Jewellery", "Subcategory": "Accessories ", "City / Location": "", "Instagram Link": "https://www.instagram.com/moonzy.jewelrystudio?igsh=MTF6OGp1dnRobDE1cw==", "Price Range": "500-1k", "Main Products": "Whimsical neck pieces and arm cuffs", "Instagram Followers": "7k", "AI Tags": "Whimsical, statement, artistic, contemporary, niche", "Search Profile": "Moonzy Jewellery Studio. Category: Jewellery. Subcategory: Accessories. Products: Whimsical neck pieces and arm cuffs. Price range: 500-1k. Audience/style/positioning tags: Whimsical, statement, artistic, contemporary, niche."}, {"Brand Name": "Fetch Craft", "Category": "Gifting", "Subcategory": "Hampers , bouquets ", "City / Location": "", "Instagram Link": "https://www.instagram.com/sofetchcraft?igsh=bXZudmVtbWx6a3lj", "Price Range": "500-4k", "Main Products": "Plushie bouquets , crochet flowers etc", "Instagram Followers": "4k", "AI Tags": "Handmade, personalised, gifting, cute, occasion-based", "Search Profile": "Fetch Craft. Category: Gifting. Subcategory: Hampers , bouquets. Products: Plushie bouquets , crochet flowers etc. Price range: 500-4k. Audience/style/positioning tags: Handmade, personalised, gifting, cute, occasion-based."}, {"Brand Name": "The Gift Era", "Category": "Gifting", "Subcategory": "Hampers", "City / Location": "", "Instagram Link": "https://www.instagram.com/thegifterashop?igsh=MTQ2aDhnYnppejRwYQ==", "Price Range": "300-8k", "Main Products": "Wedding Favours , anniversary gifts and more", "Instagram Followers": "4k", "AI Tags": "Personalised, occasion gifting, wedding, affordable, curated", "Search Profile": "The Gift Era. Category: Gifting. Subcategory: Hampers. Products: Wedding Favours , anniversary gifts and more. Price range: 300-8k. Audience/style/positioning tags: Personalised, occasion gifting, wedding, affordable, curated."}, {"Brand Name": "Cactus", "Category": "Gifting", "Subcategory": "", "City / Location": "", "Instagram Link": "https://www.instagram.com/cactuss.in?igsh=MW82ZGQwY281NzQzNQ==", "Price Range": "1k-5k", "Main Products": "resin art lockets , preserving flowers", "Instagram Followers": "32k", "AI Tags": "Artisanal, resin, sentimental, personalised, preservation", "Search Profile": "Cactus. Category: Gifting. Subcategory: . Products: resin art lockets , preserving flowers. Price range: 1k-5k. Audience/style/positioning tags: Artisanal, resin, sentimental, personalised, preservation."}, {"Brand Name": "Foundation Gifts", "Category": "Gifting", "Subcategory": "Accessories gifting ", "City / Location": "", "Instagram Link": "https://www.instagram.com/foundation.gift?igsh=a29paXkxZ3VteWw2", "Price Range": "1k-5k", "Main Products": "Bracelets , keychains , customised gifts and more", "Instagram Followers": "132k", "AI Tags": "Personalised, accessories, gifting, custom, occasion-based", "Search Profile": "Foundation Gifts. Category: Gifting. Subcategory: Accessories gifting. Products: Bracelets , keychains , customised gifts and more. Price range: 1k-5k. Audience/style/positioning tags: Personalised, accessories, gifting, custom, occasion-based."}, {"Brand Name": "Lemon and Lilac Gifting Studio", "Category": "Gifting", "Subcategory": "Gifting hampers", "City / Location": "", "Instagram Link": "https://www.instagram.com/lemonandlilacgifts?igsh=a2ZqMDhueHV6eDFl", "Price Range": "2k—8k", "Main Products": "corporate gifting , wedding favours , baby hampers etc", "Instagram Followers": "22k", "AI Tags": "Curated, premium, corporate, wedding, baby gifting", "Search Profile": "Lemon and Lilac Gifting Studio. Category: Gifting. Subcategory: Gifting hampers. Products: corporate gifting , wedding favours , baby hampers etc. Price range: 2k—8k. Audience/style/positioning tags: Curated, premium, corporate, wedding, baby gifting."}, {"Brand Name": "Foxtale", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Skincare, Gen Z, accessible, ingredient-led, digital-first", "Search Profile": "Foxtale. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Skincare, Gen Z, accessible, ingredient-led, digital-first."}, {"Brand Name": "Deconstruct", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Skincare, ingredient-led, science-backed, affordable, minimalist", "Search Profile": "Deconstruct. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Skincare, ingredient-led, science-backed, affordable, minimalist."}, {"Brand Name": "Indē Wild", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Beauty, skincare, haircare, Gen Z, culturally-rooted", "Search Profile": "Indē Wild. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Beauty, skincare, haircare, Gen Z, culturally-rooted."}, {"Brand Name": "Pilgrim", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Beauty, skincare, haircare, affordable, ingredient-led, lifestyle", "Search Profile": "Pilgrim. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Beauty, skincare, haircare, affordable, ingredient-led, lifestyle."}, {"Brand Name": "Fae Beauty", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Makeup, Gen Z, inclusive, playful, contemporary", "Search Profile": "Fae Beauty. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Makeup, Gen Z, inclusive, playful, contemporary."}, {"Brand Name": "Aqualogica", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Skincare, hydration, Gen Z, affordable, colourful", "Search Profile": "Aqualogica. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Skincare, hydration, Gen Z, affordable, colourful."}, {"Brand Name": "SUGAR", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Makeup, Gen Z, bold, affordable, trend-led", "Search Profile": "SUGAR. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Makeup, Gen Z, bold, affordable, trend-led."}, {"Brand Name": "Plum", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Beauty, skincare, vegan, conscious, accessible", "Search Profile": "Plum. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Beauty, skincare, vegan, conscious, accessible."}, {"Brand Name": "Earth Rhythm", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Beauty, skincare, sustainable, clean, conscious", "Search Profile": "Earth Rhythm. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Beauty, skincare, sustainable, clean, conscious."}, {"Brand Name": "Dot & Key", "Category": "Beauty", "Subcategory": "", "City / Location": "", "Instagram Link": "N/A", "Price Range": "", "Main Products": "", "Instagram Followers": "", "AI Tags": "Skincare, colourful, accessible, Gen Z, problem-solution", "Search Profile": "Dot & Key. Category: Beauty. Subcategory: . Products: . Price range: . Audience/style/positioning tags: Skincare, colourful, accessible, Gen Z, problem-solution."}];
+const synonyms = {"affordable": ["affordable", "budget", "cheap", "low price", "under", "accessible", "value"], "premium": ["premium", "luxury", "high end", "expensive", "elevated"], "trendy": ["trendy", "trend", "gen z", "gen-z", "viral", "fashion forward", "fashion-forward", "statement"], "minimal": ["minimal", "minimalist", "dainty", "simple", "clean"], "feminine": ["feminine", "girly", "cute", "romantic", "pretty", "pinterest"], "everyday": ["everyday", "daily", "daily wear", "regular", "casual"], "sustainable": ["sustainable", "conscious", "eco", "ethical", "handmade"], "personalised": ["personalised", "personalized", "custom", "customised", "customized"], "wedding": ["wedding", "bride", "bridal", "wedding favour", "wedding favors"], "gifting": ["gift", "gifting", "present", "hamper", "favours", "favors"], "skincare": ["skincare", "skin care", "face", "serum", "moisturizer", "sunscreen"], "makeup": ["makeup", "make up", "lipstick", "cosmetics"], "haircare": ["haircare", "hair care", "hair"], "ethnic": ["ethnic", "kurti", "kaftan", "indo western", "indo-western", "traditional"], "western": ["western", "tops", "dress", "skirts", "contemporary"], "jewellery": ["jewellery", "jewelry", "earrings", "earings", "necklace", "necklaces", "bracelet", "bracelets", "rings", "locket", "cuffs", "chain"], "clothing": ["clothing", "fashion", "wear", "outfit", "tops", "dress", "dresses", "skirts", "kurtis"], "beauty": ["beauty", "cosmetics", "makeup", "skincare", "haircare"], "gifting_category": ["gifting", "gifts", "hampers", "bouquets", "favours", "resin art"]};
+let activeCat = "All";
+
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); activeCat=b.dataset.cat; runSearch();
+}));
+document.querySelectorAll(".example").forEach(b=>b.addEventListener("click",()=>{
+  document.getElementById("query").value=b.textContent; runSearch();
+}));
+document.getElementById("searchBtn").addEventListener("click",runSearch);
+document.getElementById("query").addEventListener("keydown",e=>{if(e.key==="Enter" && (e.metaKey||e.ctrlKey)) runSearch();});
+
+function tokens(q){
+  const s=q.toLowerCase();
+  const out=new Set();
+  Object.entries(synonyms).forEach(([key, arr])=>{
+    if(arr.some(x=>s.includes(x))) out.add(key);
+  });
+  return [...out];
+}
+function fieldText(b){
+  return Object.values(b).filter(v=>v!==null && v!==undefined).join(" ").toLowerCase();
+}
+function priceFit(q, price){
+  const p=String(price||"").toLowerCase();
+  if(!p) return 0;
+  if(/cheap|affordable|budget|low price|under/.test(q)) return /500|300|400|1k-2k|1k-3k|2k-4k|500-2k|500-4k/.test(p)?8:0;
+  if(/luxury|premium|high end|expensive/.test(q)) return /10k|30k|premium|luxury/.test(p)?8:0;
+  return 0;
+}
+function score(b,q){
+  const t=tokens(q), text=fieldText(b);
+  let s=0, hits=[];
+  const cat = String(b["Category"]||"");
+  if(activeCat!=="All"){
+    if(cat===activeCat){s+=30;hits.push(cat)}
+    else return -1;
+  } else {
+    const categoryHit=Object.entries(categoryWords).find(([c,words])=>words.some(w=>q.toLowerCase().includes(w)));
+    if(categoryHit){
+      if(cat===categoryHit[0]){s+=30;hits.push(cat)}
+      else s-=4;
+    }
+  }
+  t.forEach(k=>{
+    const words=synonyms[k]||[];
+    const hit=words.some(w=>text.includes(w));
+    if(hit){s+=12;hits.push(k.replace("_"," "));}
+  });
+  // direct phrase/term overlap gives extra weight
+  q.toLowerCase().split(/[^a-z0-9-]+/).filter(x=>x.length>3).forEach(w=>{
+    if(text.includes(w)) s+=2;
+  });
+  s += priceFit(q.toLowerCase(), b["Price Range"]);
+  return Math.min(98, Math.max(0, s));
+}
+function reason(b,q){
+  const t=tokens(q), text=fieldText(b), reasons=[];
+  t.forEach(k=>{
+    const words=synonyms[k]||[];
+    if(words.some(w=>text.includes(w))) reasons.push(k.replace("_"," "));
+  });
+  if(b["Main Products"]) reasons.push("product fit");
+  if(!reasons.length) reasons.push("overall dataset match");
+  return reasons.slice(0,5).join(" · ");
+}
+function tags(b){
+  return String(b["AI Tags"]||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,5);
+}
+function runSearch(){
+  const q=document.getElementById("query").value.trim();
+  const results=document.getElementById("results");
+  const limit=Number(document.getElementById("limit").value);
+  if(!q){
+    results.innerHTML='<div class="empty" style="grid-column:1/-1">Describe the kind of brand you want, then click <b>Find brands</b>.</div>';
+    document.getElementById("count").textContent="";
+    return;
+  }
+  const ranked=brands.map(b=>({...b,_score:score(b,q)})).filter(b=>b._score>=0).sort((a,b)=>b._score-a._score).slice(0,limit);
+  document.getElementById("count").textContent=`${ranked.length} matches`;
+  results.innerHTML=ranked.map((b,i)=>{
+    const url=String(b["Instagram Link"]||"");
+    const link=url.startsWith("http")?`<a class="link" href="${url}" target="_blank" rel="noopener">View Instagram ↗</a>`:"";
+    return `<article class="card">
+      <div class="rank">MATCH ${String(i+1).padStart(2,"0")}</div>
+      <h3>${esc(b["Brand Name"])}</h3>
+      <div class="meta">${esc(b["Category"])}${b["Subcategory"]?" · "+esc(b["Subcategory"]):""}${b["Price Range"]?" · "+esc(b["Price Range"]):""}</div>
+      <span class="score">${Math.round(b._score)}% relevance</span>
+      <div class="tags">${tags(b).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+      <div class="why"><b>Why it matches:</b> ${esc(reason(b,q))}. ${b["Main Products"]?esc(b["Main Products"]):"Product details are limited in the dataset."}</div>
+      ${link}
+    </article>`;
+  }).join("");
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+runSearch();
+</script>
+</body>
+</html>
